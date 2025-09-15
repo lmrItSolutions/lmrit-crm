@@ -3,6 +3,15 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co'
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key'
 
+// Validate environment variables
+if (!supabaseUrl || supabaseUrl === 'https://placeholder.supabase.co') {
+  console.warn('VITE_SUPABASE_URL is not set')
+}
+
+if (!supabaseAnonKey || supabaseAnonKey === 'placeholder-key') {
+  console.warn('VITE_SUPABASE_ANON_KEY is not set')
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
