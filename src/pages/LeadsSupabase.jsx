@@ -6,17 +6,17 @@ import supabaseLeads from '../services/supabaseLeads'
 import supabaseAuth from '../services/supabaseAuth'
 
 // Helper functions
-function isConsentValid(consentDate) {
-  if (!consentDate) return false
-  const consent = new Date(consentDate)
+function isConsentValid(consent_date) {
+  if (!consent_date) return false
+  const consent = new Date(consent_date)
   const now = new Date()
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate())
   return consent >= sixMonthsAgo
 }
 
-function getConsentStatus(consent, consentDate) {
+function getConsentStatus(consent, consent_date) {
   if (consent === "No") return { text: "No", color: "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200" }
-  if (consent === "Yes" && isConsentValid(consentDate)) {
+  if (consent === "Yes" && isConsentValid(consent_date)) {
     return { text: "Yes (Valid)", color: "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200" }
   }
   return { text: "Yes (Expired)", color: "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200" }
@@ -53,7 +53,7 @@ export default function LeadsSupabase() {
     company: "",
     status: "New",
     consent: "Yes",
-    consentDate: new Date().toISOString().split('T')[0],
+    consent_date: new Date().toISOString().split('T')[0],
     state: "",
     assigned_to: ""
   })
@@ -162,7 +162,7 @@ export default function LeadsSupabase() {
           company: "",
           status: "New",
           consent: "Yes",
-          consentDate: new Date().toISOString().split('T')[0],
+          consent_date: new Date().toISOString().split('T')[0],
           state: "",
           assigned_to: currentUser?.id || ""
         })
@@ -253,7 +253,7 @@ export default function LeadsSupabase() {
       Company: lead.company,
       Status: lead.status,
       Consent: lead.consent,
-      'Consent Date': lead.consentDate,
+      'Consent Date': lead.consent_date,
       State: lead.state,
       'Created At': new Date(lead.created_at).toLocaleDateString()
     }))
@@ -286,7 +286,7 @@ export default function LeadsSupabase() {
           company: row.Company || row.company || '',
           status: row.Status || row.status || 'New',
           consent: row.Consent || row.consent || 'No',
-          consentDate: row['Consent Date'] || row.consentDate || null,
+          consent_date: row['Consent Date'] || row.consent_date || null,
           state: row.State || row.state || '',
           assigned_to: currentUser?.id || ''
         }))
@@ -429,7 +429,7 @@ export default function LeadsSupabase() {
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {filteredLeads.map((lead) => {
-                const consentStatus = getConsentStatus(lead.consent, lead.consentDate)
+                const consentStatus = getConsentStatus(lead.consent, lead.consent_date)
                 return (
                   <tr key={lead.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -455,14 +455,14 @@ export default function LeadsSupabase() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {lead.consentDate ? (
+                      {lead.consent_date ? (
                         <div>
                           <div className="text-gray-900 dark:text-white">
-                            {new Date(lead.consentDate).toLocaleDateString('en-GB')}
+                            {new Date(lead.consent_date).toLocaleDateString('en-GB')}
                           </div>
                           {lead.consent === "Yes" && (
-                            <div className={`text-xs ${isConsentValid(lead.consentDate) ? 'text-green-600' : 'text-orange-600'}`}>
-                              {isConsentValid(lead.consentDate) ? 'Valid' : 'Expired'}
+                            <div className={`text-xs ${isConsentValid(lead.consent_date) ? 'text-green-600' : 'text-orange-600'}`}>
+                              {isConsentValid(lead.consent_date) ? 'Valid' : 'Expired'}
                             </div>
                           )}
                         </div>
@@ -587,23 +587,23 @@ export default function LeadsSupabase() {
                   placeholder="dd/mm/yyyy"
                   value={(() => {
                     try {
-                      if (newLead.consentDate) {
-                        if (newLead.consentDate.includes('-')) {
-                          const parts = newLead.consentDate.split('-');
+                      if (newLead.consent_date) {
+                        if (newLead.consent_date.includes('-')) {
+                          const parts = newLead.consent_date.split('-');
                           if (parts.length === 3) {
                             if (parts[0].length === 4) {
-                              return new Date(newLead.consentDate).toLocaleDateString('en-GB');
+                              return new Date(newLead.consent_date).toLocaleDateString('en-GB');
                             } else {
                               const [day, month, year] = parts;
                               return `${day}/${month}/${year}`;
                             }
                           }
                         }
-                        return newLead.consentDate;
+                        return newLead.consent_date;
                       }
                       return '';
                     } catch (error) {
-                      return newLead.consentDate || '';
+                      return newLead.consent_date || '';
                     }
                   })()}
                   onChange={(e) => {
@@ -611,9 +611,9 @@ export default function LeadsSupabase() {
                     if (input.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
                       const [day, month, year] = input.split('/');
                       const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-                      setNewLead({...newLead, consentDate: isoDate});
+                      setNewLead({...newLead, consent_date: isoDate});
                     } else {
-                      setNewLead({...newLead, consentDate: input});
+                      setNewLead({...newLead, consent_date: input});
                     }
                   }}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -733,23 +733,23 @@ export default function LeadsSupabase() {
                   placeholder="dd/mm/yyyy"
                   value={(() => {
                     try {
-                      if (selectedLead.consentDate) {
-                        if (selectedLead.consentDate.includes('-')) {
-                          const parts = selectedLead.consentDate.split('-');
+                      if (selectedLead.consent_date) {
+                        if (selectedLead.consent_date.includes('-')) {
+                          const parts = selectedLead.consent_date.split('-');
                           if (parts.length === 3) {
                             if (parts[0].length === 4) {
-                              return new Date(selectedLead.consentDate).toLocaleDateString('en-GB');
+                              return new Date(selectedLead.consent_date).toLocaleDateString('en-GB');
                             } else {
                               const [day, month, year] = parts;
                               return `${day}/${month}/${year}`;
                             }
                           }
                         }
-                        return selectedLead.consentDate;
+                        return selectedLead.consent_date;
                       }
                       return '';
                     } catch (error) {
-                      return selectedLead.consentDate || '';
+                      return selectedLead.consent_date || '';
                     }
                   })()}
                   onChange={(e) => {
@@ -757,9 +757,9 @@ export default function LeadsSupabase() {
                     if (input.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
                       const [day, month, year] = input.split('/');
                       const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-                      setSelectedLead({...selectedLead, consentDate: isoDate});
+                      setSelectedLead({...selectedLead, consent_date: isoDate});
                     } else {
-                      setSelectedLead({...selectedLead, consentDate: input});
+                      setSelectedLead({...selectedLead, consent_date: input});
                     }
                   }}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -839,12 +839,12 @@ export default function LeadsSupabase() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Consent Date</label>
                 <p className="text-sm text-gray-900 dark:text-white">
-                  {selectedLead.consentDate ? (
+                  {selectedLead.consent_date ? (
                     <div>
-                      <div>{new Date(selectedLead.consentDate).toLocaleDateString('en-GB')}</div>
+                      <div>{new Date(selectedLead.consent_date).toLocaleDateString('en-GB')}</div>
                       {selectedLead.consent === "Yes" && (
-                        <div className={`text-xs ${isConsentValid(selectedLead.consentDate) ? 'text-green-600' : 'text-orange-600'}`}>
-                          {isConsentValid(selectedLead.consentDate) ? 'Valid' : 'Expired'}
+                        <div className={`text-xs ${isConsentValid(selectedLead.consent_date) ? 'text-green-600' : 'text-orange-600'}`}>
+                          {isConsentValid(selectedLead.consent_date) ? 'Valid' : 'Expired'}
                         </div>
                       )}
                     </div>
