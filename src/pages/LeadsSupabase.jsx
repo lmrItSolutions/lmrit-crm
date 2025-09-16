@@ -180,15 +180,28 @@ export default function LeadsSupabase() {
   const handleEditLead = async (e) => {
     e.preventDefault()
     try {
-      console.log('🔄 Updating lead:', selectedLead.id, selectedLead)
-      console.log('📝 Lead data being sent:', {
-        id: selectedLead.id,
+      // Extract just the UUID from assigned_to if it's an object
+      const assignedToId = typeof selectedLead.assigned_to === 'object' 
+        ? selectedLead.assigned_to.id 
+        : selectedLead.assigned_to
+
+      // Prepare clean lead data for update
+      const leadUpdateData = {
         name: selectedLead.name,
         email: selectedLead.email,
-        assigned_to: selectedLead.assigned_to
-      })
+        phone: selectedLead.phone,
+        company: selectedLead.company,
+        status: selectedLead.status,
+        consent: selectedLead.consent,
+        consent_date: selectedLead.consent_date,
+        state: selectedLead.state,
+        assigned_to: assignedToId
+      }
+
+      console.log('🔄 Updating lead:', selectedLead.id, selectedLead)
+      console.log('📝 Lead data being sent:', leadUpdateData)
       
-      const { success, data, error } = await supabaseLeads.updateLead(selectedLead.id, selectedLead)
+      const { success, data, error } = await supabaseLeads.updateLead(selectedLead.id, leadUpdateData)
       
       console.log('📊 Update response:', { success, data, error })
       console.log('📋 Updated lead data:', data)
@@ -240,7 +253,14 @@ export default function LeadsSupabase() {
 
   // Handle edit lead
   const handleEditLeadClick = (lead) => {
-    setSelectedLead(lead)
+    // Ensure assigned_to is just the UUID, not the full user object
+    const leadForEdit = {
+      ...lead,
+      assigned_to: typeof lead.assigned_to === 'object' 
+        ? lead.assigned_to.id 
+        : lead.assigned_to
+    }
+    setSelectedLead(leadForEdit)
     setShowEditModal(true)
   }
 
