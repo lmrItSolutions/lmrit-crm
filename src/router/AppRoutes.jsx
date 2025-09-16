@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom"
 import Dashboard from "../pages/Dashboard"
-import Leads from "../pages/LeadsSimple"
+import Leads from "../pages/LeadsSupabase"
 import WhatsAppChat from "../pages/WhatsAppChat"
 import CallLogs from "../pages/CallLogs"
 import Remarks from "../pages/Remarks"

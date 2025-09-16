@@ -1,13 +1,16 @@
 import AppRoutes from './router';
 import ThemeProvider from './components/ThemeProvider';
 import { AriaProvider } from './context/AriaContext';
+import { SupabaseProvider } from './context/SupabaseContext';
 
 function App() {
   return (
     <ThemeProvider>
-      <AriaProvider>
-        <AppRoutes />
-      </AriaProvider>
+      <SupabaseProvider>
+        <AriaProvider>
+          <AppRoutes />
+        </AriaProvider>
+      </SupabaseProvider>
     </ThemeProvider>
   );
 }
