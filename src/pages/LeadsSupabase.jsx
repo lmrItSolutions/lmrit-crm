@@ -68,7 +68,7 @@ export default function LeadsSupabase() {
       } else {
         // Create a default user for testing
         const defaultUser = {
-          id: 'default-user-id',
+          id: '550e8400-e29b-41d4-a716-446655440000',
           first_name: 'Test',
           last_name: 'User',
           email: 'test@example.com',
@@ -81,7 +81,7 @@ export default function LeadsSupabase() {
       console.error('Error loading user:', error)
       // Create a default user for testing
       const defaultUser = {
-        id: 'default-user-id',
+        id: '550e8400-e29b-41d4-a716-446655440000',
         first_name: 'Test',
         last_name: 'User',
         email: 'test@example.com',
