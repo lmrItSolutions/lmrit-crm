@@ -13,7 +13,7 @@ class SupabaseLeadsMultiAgentService {
       let query = db.leads()
         .select(`
           *,
-          assigned_user:users!leads_assigned_to_fkey(
+          assigned_to:users!leads_assigned_to_fkey(
             id,
             first_name,
             last_name,
@@ -76,7 +76,7 @@ class SupabaseLeadsMultiAgentService {
       const { data, error } = await db.leads()
         .select(`
           *,
-          assigned_user:users!leads_assigned_to_fkey(
+          assigned_to:users!leads_assigned_to_fkey(
             id,
             first_name,
             last_name,
@@ -117,7 +117,7 @@ class SupabaseLeadsMultiAgentService {
         .insert(leadData)
         .select(`
           *,
-          assigned_user:users!leads_assigned_to_fkey(
+          assigned_to:users!leads_assigned_to_fkey(
             id,
             first_name,
             last_name,
@@ -153,7 +153,7 @@ class SupabaseLeadsMultiAgentService {
         .eq('id', id)
         .select(`
           *,
-          assigned_user:users!leads_assigned_to_fkey(
+          assigned_to:users!leads_assigned_to_fkey(
             id,
             first_name,
             last_name,
@@ -319,7 +319,7 @@ class SupabaseLeadsMultiAgentService {
         .eq('id', leadId)
         .select(`
           *,
-          assigned_user:users!leads_assigned_to_fkey(
+          assigned_to:users!leads_assigned_to_fkey(
             id,
             first_name,
             last_name,
