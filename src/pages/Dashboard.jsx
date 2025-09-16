@@ -12,69 +12,13 @@ import {
 
 
 const stats = [
-  { title: "Total   Leads", value: "2,847", change: "+12.5%", icon: Users, trend: "up" },
-  { title: "Conversion Rate", value: "24.8%", change: "+3.2%", icon: TrendingUp, trend: "up" },
-  { title: "Revenue", value: "89,432", change: "+8.1%", icon: DollarSign, trend: "up" },
-  { title: "Active Deals", value: "156", change: "-2.4%", icon: Target, trend: "down" },
+  { title: "Total Leads", value: "0", change: "0%", icon: Users, trend: "up" },
+  { title: "Conversion Rate", value: "0%", change: "0%", icon: TrendingUp, trend: "up" },
+  { title: "Revenue", value: "0", change: "0%", icon: DollarSign, trend: "up" },
+  { title: "Active Deals", value: "0", change: "0%", icon: Target, trend: "up" },
 ]
 
-const leads = [
-  {
-    id: 1,
-    name: " d",
-    email: "sarah.johnson@email.com",
-    phone: "+1 (555) 123-4567",
-    company: "Tech Solutions Inc",
-    status: "Hot",
-    value: "$12,500",
-    lastContact: "2 hours ago",
-    avatar: "/placeholder.svg",
-  },
-  {
-    id: 2,
-    name: "Michael Chen",
-    email: "m.chen@company.com",
-    phone: "+1 (555) 987-6543",
-    company: "Digital Marketing Co",
-    status: "Warm",
-    value: "$8,750",
-    lastContact: "1 day ago",
-    avatar: "/placeholder.svg",
-  },
-  {
-    id: 3,
-    name: "Emily Rodriguez",
-    email: "emily.r@startup.io",
-    phone: "+1 (555) 456-7890",
-    company: "Innovation Labs",
-    status: "Cold",
-    value: "$5,200",
-    lastContact: "3 days ago",
-    avatar: "/placeholder.svg",
-  },
-  {
-    id: 4,
-    name: "David Thompson",
-    email: "david@enterprise.com",
-    phone: "+1 (555) 321-0987",
-    company: "Enterprise Solutions",
-    status: "Hot",
-    value: "$25,000",
-    lastContact: "5 hours ago",
-    avatar: "/placeholder.svg",
-  },
-  {
-    id: 5,
-    name: "Lisa Wang",
-    email: "lisa.wang@tech.com",
-    phone: "+1 (555) 654-3210",
-    company: "Future Tech",
-    status: "Warm",
-    value: "$15,300",
-    lastContact: "2 days ago",
-    avatar: "/placeholder.svg",
-  },
-]
+const leads = []
 
 function getStatusColor(status) {
   switch (status) {
