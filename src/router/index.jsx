@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import DashboardLayout from '../layouts/DashboardLayout';
 import Dashboard from '../pages/Dashboard';
-import Leads from '../pages/Leads';
+import Leads from '../pages/LeadsSupabase';
 import Clients from '../pages/Clients';
 import Activity from '../pages/Activity';
 import CallLogs from '../pages/CallLogs';
