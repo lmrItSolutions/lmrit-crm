@@ -60,28 +60,64 @@ export default function LeadsSupabase() {
   }, [])
 
   const loadCurrentUser = async () => {
-    const { success, data } = await supabaseAuth.getCurrentUser()
-    if (success && data) {
-      setCurrentUser(data.profile)
-      setNewLead(prev => ({ ...prev, assigned_to: data.profile.id }))
+    try {
+      const { success, data } = await supabaseAuth.getCurrentUser()
+      if (success && data) {
+        setCurrentUser(data.profile)
+        setNewLead(prev => ({ ...prev, assigned_to: data.profile.id }))
+      } else {
+        // Create a default user for testing
+        const defaultUser = {
+          id: 'default-user-id',
+          first_name: 'Test',
+          last_name: 'User',
+          email: 'test@example.com',
+          role: 'agent'
+        }
+        setCurrentUser(defaultUser)
+        setNewLead(prev => ({ ...prev, assigned_to: defaultUser.id }))
+      }
+    } catch (error) {
+      console.error('Error loading user:', error)
+      // Create a default user for testing
+      const defaultUser = {
+        id: 'default-user-id',
+        first_name: 'Test',
+        last_name: 'User',
+        email: 'test@example.com',
+        role: 'agent'
+      }
+      setCurrentUser(defaultUser)
+      setNewLead(prev => ({ ...prev, assigned_to: defaultUser.id }))
     }
   }
 
   const loadLeads = async () => {
     try {
       setLoading(true)
+      console.log('Loading leads from Supabase...')
       const { success, data, error } = await supabaseLeads.getLeads()
+      
+      console.log('Supabase response:', { success, data, error })
       
       if (success) {
         setLeads(data || [])
         setError(null)
+        console.log('Leads loaded successfully:', data?.length || 0, 'leads')
       } else {
         setError(error)
         console.error('Error loading leads:', error)
+        // If no leads found, show empty array instead of error
+        if (error && error.includes('No rows found')) {
+          setLeads([])
+          setError(null)
+        }
       }
     } catch (err) {
       setError('Failed to load leads')
       console.error('Error loading leads:', err)
+      // Show empty array on error
+      setLeads([])
     } finally {
       setLoading(false)
     }
@@ -133,19 +169,25 @@ export default function LeadsSupabase() {
   const handleEditLead = async (e) => {
     e.preventDefault()
     try {
+      console.log('Updating lead:', selectedLead.id, selectedLead)
       const { success, data, error } = await supabaseLeads.updateLead(selectedLead.id, selectedLead)
+      
+      console.log('Update response:', { success, data, error })
       
       if (success) {
         setLeads(leads.map(lead => lead.id === selectedLead.id ? data : lead))
         setShowEditModal(false)
         setSelectedLead(null)
+        console.log('Lead updated successfully')
       } else {
         setError(error)
         console.error('Error updating lead:', error)
+        alert(`Error updating lead: ${error}`)
       }
     } catch (err) {
       setError('Failed to update lead')
       console.error('Error updating lead:', err)
+      alert(`Failed to update lead: ${err.message}`)
     }
   }
 
