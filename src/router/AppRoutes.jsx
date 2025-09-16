@@ -1,12 +1,14 @@
 import { Routes, Route, Navigate } from "react-router-dom"
 import Dashboard from "../pages/Dashboard"
-import Leads from "../pages/LeadsSupabase"
+import Leads from "../pages/LeadsTest"
 import WhatsAppChat from "../pages/WhatsAppChat"
 import CallLogs from "../pages/CallLogs"
 import Remarks from "../pages/Remarks"
 import Activity from "../pages/Activity"
 import TeamManagement from "../pages/TeamManagement"
 import Settings from "../pages/Settings"
+
+console.log('🔄 AppRoutes loaded - Leads component:', Leads)
 
 export default function AppRoutes() {
   return (
