@@ -28,6 +28,7 @@ function getConsentColor(consent) {
 }
 
 export default function LeadsSupabase() {
+  console.log('🎯 LeadsSupabase component loaded - version 2.0')
   const [leads, setLeads] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
