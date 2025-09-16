@@ -5,11 +5,11 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-k
 
 // Validate environment variables
 if (!supabaseUrl || supabaseUrl === 'https://placeholder.supabase.co') {
-  console.warn('VITE_SUPABASE_URL is not set')
+  console.warn('VITE_SUPABASE_URL is not set - check Vercel environment variables')
 }
 
 if (!supabaseAnonKey || supabaseAnonKey === 'placeholder-key') {
-  console.warn('VITE_SUPABASE_ANON_KEY is not set')
+  console.warn('VITE_SUPABASE_ANON_KEY is not set - check Vercel environment variables')
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
