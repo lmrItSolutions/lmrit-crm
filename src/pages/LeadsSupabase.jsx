@@ -29,9 +29,13 @@ function getConsentColor(consent) {
 
 export default function LeadsSupabase() {
   console.log('🎯 LeadsSupabase component loaded - version 2.0')
+  console.log('🔍 Component state initialized')
+  
   const [leads, setLeads] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  
+  console.log('📊 Initial state:', { leads: leads.length, loading, error })
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("All")
   const [consentFilter, setConsentFilter] = useState("All")
