@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:prod": "vite build --mode production",
+    "deploy": "npm run build:prod && vercel --prod",
+    "create-users": "node scripts/create-users.js",
+    "validate-config": "node -e \"import('./src/config/production.js').then(m => m.validateProductionConfig())\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
