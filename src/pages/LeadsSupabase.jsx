@@ -55,6 +55,7 @@ export default function LeadsSupabase() {
 
   // Load current user and leads on component mount
   useEffect(() => {
+    console.log('🚀 LeadsSupabase component mounted - starting data load')
     loadCurrentUser()
     loadLeads()
   }, [])
