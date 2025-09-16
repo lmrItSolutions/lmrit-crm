@@ -1,15 +1,15 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://eyckmkzfisrugtdgowdr.supabase.co'
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5Y2tta3pmaXNydWd0ZGdvd2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5MjIyMjYsImV4cCI6MjA3MzQ5ODIyNn0.n_j-wJV_m-Trc25jz8do0BNNHKJusj3cGGOKZNzjyCQ'
 
 // Validate environment variables
-if (!supabaseUrl || supabaseUrl === 'https://placeholder.supabase.co') {
-  console.warn('VITE_SUPABASE_URL is not set - check Vercel environment variables')
+if (!import.meta.env.VITE_SUPABASE_URL) {
+  console.warn('VITE_SUPABASE_URL is not set - using fallback')
 }
 
-if (!supabaseAnonKey || supabaseAnonKey === 'placeholder-key') {
-  console.warn('VITE_SUPABASE_ANON_KEY is not set - check Vercel environment variables')
+if (!import.meta.env.VITE_SUPABASE_ANON_KEY) {
+  console.warn('VITE_SUPABASE_ANON_KEY is not set - using fallback')
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
