@@ -4,6 +4,7 @@ import * as XLSX from 'xlsx'
 import { maskPhoneNumber, cleanPhoneNumber } from '../utils/numberMasking'
 import supabaseLeads from '../services/supabaseLeads'
 import supabaseAuth from '../services/supabaseAuth'
+import mockLeadsService from '../services/mockLeadsService'
 
 // Helper functions
 function getInterestedStatus(interested) {
@@ -88,12 +89,22 @@ export default function LeadsSupabase() {
   const loadLeads = async () => {
     try {
       setLoading(true)
-      console.log('🔄 Loading leads from Supabase...')
+      console.log('🔄 Loading leads...')
       console.log('🔗 Supabase URL:', import.meta.env.VITE_SUPABASE_URL || 'using fallback')
       
-      const { success, data, error } = await supabaseLeads.getLeads()
+      // Try Supabase first, fallback to mock service
+      let { success, data, error } = await supabaseLeads.getLeads()
       
-      console.log('📊 Supabase response:', { success, data, error })
+      // If Supabase fails, use mock service
+      if (!success && error && error.includes('Failed to fetch')) {
+        console.log('⚠️ Supabase unavailable, using mock service...')
+        const mockResult = await mockLeadsService.getLeads()
+        success = mockResult.success
+        data = mockResult.data
+        error = mockResult.error
+      }
+      
+      console.log('📊 Response:', { success, data, error })
       console.log('📋 Raw data:', data)
       
       if (success) {
@@ -137,7 +148,16 @@ export default function LeadsSupabase() {
   const handleAddLead = async (e) => {
     e.preventDefault()
     try {
-      const { success, data, error } = await supabaseLeads.createLead(newLead)
+      let { success, data, error } = await supabaseLeads.createLead(newLead)
+      
+      // If Supabase fails, use mock service
+      if (!success && error && error.includes('Failed to fetch')) {
+        console.log('⚠️ Supabase unavailable, using mock service for add...')
+        const mockResult = await mockLeadsService.createLead(newLead)
+        success = mockResult.success
+        data = mockResult.data
+        error = mockResult.error
+      }
       
       if (success) {
         setLeads([data, ...leads])
@@ -184,7 +204,16 @@ export default function LeadsSupabase() {
       console.log('🔄 Updating lead:', selectedLead.id, selectedLead)
       console.log('📝 Lead data being sent:', leadUpdateData)
       
-      const { success, data, error } = await supabaseLeads.updateLead(selectedLead.id, leadUpdateData)
+      let { success, data, error } = await supabaseLeads.updateLead(selectedLead.id, leadUpdateData)
+      
+      // If Supabase fails, use mock service
+      if (!success && error && error.includes('Failed to fetch')) {
+        console.log('⚠️ Supabase unavailable, using mock service for update...')
+        const mockResult = await mockLeadsService.updateLead(selectedLead.id, leadUpdateData)
+        success = mockResult.success
+        data = mockResult.data
+        error = mockResult.error
+      }
       
       console.log('📊 Update response:', { success, data, error })
       console.log('📋 Updated lead data:', data)
