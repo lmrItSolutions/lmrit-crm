@@ -23,6 +23,22 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true
+  },
+  global: {
+    fetch: (url, options = {}) => {
+      console.log('🌐 Fetching:', url)
+      return fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      }).catch(error => {
+        console.error('💥 Fetch error:', error)
+        throw error
+      })
+    }
   }
 })
 
