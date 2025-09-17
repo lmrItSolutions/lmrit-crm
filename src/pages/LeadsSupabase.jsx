@@ -6,24 +6,13 @@ import supabaseLeads from '../services/supabaseLeads'
 import supabaseAuth from '../services/supabaseAuth'
 
 // Helper functions
-function isConsentValid(consent_date) {
-  if (!consent_date) return false
-  const consent = new Date(consent_date)
-  const now = new Date()
-  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate())
-  return consent >= sixMonthsAgo
+function getInterestedStatus(interested) {
+  if (interested === "Yes") return { text: "Yes", color: "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200" }
+  return { text: "No", color: "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200" }
 }
 
-function getConsentStatus(consent, consent_date) {
-  if (consent === "No") return { text: "No", color: "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200" }
-  if (consent === "Yes" && isConsentValid(consent_date)) {
-    return { text: "Yes (Valid)", color: "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200" }
-  }
-  return { text: "Yes (Expired)", color: "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200" }
-}
-
-function getConsentColor(consent) {
-  if (consent === "Yes") return "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
+function getInterestedColor(interested) {
+  if (interested === "Yes") return "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
   return "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
 }
 
@@ -38,7 +27,7 @@ export default function LeadsSupabase() {
   console.log('📊 Initial state:', { leads: leads.length, loading, error })
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("All")
-  const [consentFilter, setConsentFilter] = useState("All")
+  const [interestedFilter, setInterestedFilter] = useState("All")
   const [showAddModal, setShowAddModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showViewModal, setShowViewModal] = useState(false)
@@ -48,12 +37,10 @@ export default function LeadsSupabase() {
   // New lead form state
   const [newLead, setNewLead] = useState({
     name: "",
-    email: "",
     phone: "",
-    company: "",
     status: "New",
-    consent: "Yes",
-    consent_date: new Date().toISOString().split('T')[0],
+    interested: "Yes",
+    contacted_date: new Date().toISOString().split('T')[0],
     state: "",
     assigned_to: ""
   })
@@ -137,13 +124,13 @@ export default function LeadsSupabase() {
   // Filter leads based on search and filters
   const filteredLeads = leads.filter(lead => {
     const matchesSearch = lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         lead.phone.includes(searchTerm)
+                         lead.phone.includes(searchTerm) ||
+                         lead.state.toLowerCase().includes(searchTerm.toLowerCase())
     
     const matchesStatus = statusFilter === "All" || lead.status === statusFilter
-    const matchesConsent = consentFilter === "All" || lead.consent === consentFilter
+    const matchesInterested = interestedFilter === "All" || lead.interested === interestedFilter
     
-    return matchesSearch && matchesStatus && matchesConsent
+    return matchesSearch && matchesStatus && matchesInterested
   })
 
   // Handle add lead
@@ -157,12 +144,10 @@ export default function LeadsSupabase() {
         setShowAddModal(false)
         setNewLead({
           name: "",
-          email: "",
           phone: "",
-          company: "",
           status: "New",
-          consent: "Yes",
-          consent_date: new Date().toISOString().split('T')[0],
+          interested: "Yes",
+          contacted_date: new Date().toISOString().split('T')[0],
           state: "",
           assigned_to: currentUser?.id || ""
         })
@@ -188,12 +173,10 @@ export default function LeadsSupabase() {
       // Prepare clean lead data for update
       const leadUpdateData = {
         name: selectedLead.name,
-        email: selectedLead.email,
         phone: selectedLead.phone,
-        company: selectedLead.company,
         status: selectedLead.status,
-        consent: selectedLead.consent,
-        consent_date: selectedLead.consent_date,
+        interested: selectedLead.interested,
+        contacted_date: selectedLead.contacted_date,
         state: selectedLead.state,
         assigned_to: assignedToId
       }
@@ -406,13 +389,13 @@ export default function LeadsSupabase() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Consent</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Interested</label>
             <select
-              value={consentFilter}
-              onChange={(e) => setConsentFilter(e.target.value)}
+              value={interestedFilter}
+              onChange={(e) => setInterestedFilter(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="All">All Consent</option>
+              <option value="All">All Interested</option>
               <option value="Yes">Yes</option>
               <option value="No">No</option>
             </select>
@@ -422,7 +405,7 @@ export default function LeadsSupabase() {
               onClick={() => {
                 setSearchTerm("")
                 setStatusFilter("All")
-                setConsentFilter("All")
+                setInterestedFilter("All")
               }}
               className="w-full px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
             >
@@ -439,17 +422,17 @@ export default function LeadsSupabase() {
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Phone</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Customer Consent</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Consent Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Interested</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Contacted Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">State</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {filteredLeads.map((lead) => {
-                const consentStatus = getConsentStatus(lead.consent, lead.consent_date)
+                const interestedStatus = getInterestedStatus(lead.interested)
                 return (
                   <tr key={lead.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -461,34 +444,28 @@ export default function LeadsSupabase() {
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900 dark:text-white">{lead.name}</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">{lead.company}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{lead.email}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {maskPhoneNumber(lead.phone)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${consentStatus.color}`}>
-                        {consentStatus.text}
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${interestedStatus.color}`}>
+                        {interestedStatus.text}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {lead.consent_date ? (
-                        <div>
-                          <div className="text-gray-900 dark:text-white">
-                            {new Date(lead.consent_date).toLocaleDateString('en-GB')}
-                          </div>
-                          {lead.consent === "Yes" && (
-                            <div className={`text-xs ${isConsentValid(lead.consent_date) ? 'text-green-600' : 'text-orange-600'}`}>
-                              {isConsentValid(lead.consent_date) ? 'Valid' : 'Expired'}
-                            </div>
-                          )}
+                      {lead.contacted_date ? (
+                        <div className="text-gray-900 dark:text-white">
+                          {new Date(lead.contacted_date).toLocaleDateString('en-GB')}
                         </div>
                       ) : (
                         <span className="text-gray-400">Not set</span>
                       )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      {lead.state || <span className="text-gray-400">Not set</span>}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -549,16 +526,6 @@ export default function LeadsSupabase() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-                <input
-                  type="email"
-                  value={newLead.email}
-                  onChange={(e) => setNewLead({...newLead, email: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
                 <input
                   type="tel"
@@ -579,20 +546,10 @@ export default function LeadsSupabase() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company</label>
-                <input
-                  type="text"
-                  value={newLead.company}
-                  onChange={(e) => setNewLead({...newLead, company: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Customer Consent</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Interested</label>
                 <select
-                  value={newLead.consent}
-                  onChange={(e) => setNewLead({...newLead, consent: e.target.value})}
+                  value={newLead.interested}
+                  onChange={(e) => setNewLead({...newLead, interested: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
@@ -601,46 +558,15 @@ export default function LeadsSupabase() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Consent Date</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contacted Date</label>
                 <input
                   type="text"
-                  placeholder="dd/mm/yyyy"
-                  value={(() => {
-                    try {
-                      if (newLead.consent_date) {
-                        if (newLead.consent_date.includes('-')) {
-                          const parts = newLead.consent_date.split('-');
-                          if (parts.length === 3) {
-                            if (parts[0].length === 4) {
-                              return new Date(newLead.consent_date).toLocaleDateString('en-GB');
-                            } else {
-                              const [day, month, year] = parts;
-                              return `${day}/${month}/${year}`;
-                            }
-                          }
-                        }
-                        return newLead.consent_date;
-                      }
-                      return '';
-                    } catch (error) {
-                      return newLead.consent_date || '';
-                    }
-                  })()}
-                  onChange={(e) => {
-                    const input = e.target.value;
-                    if (input.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
-                      const [day, month, year] = input.split('/');
-                      const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-                      setNewLead({...newLead, consent_date: isoDate});
-                    } else {
-                      setNewLead({...newLead, consent_date: input});
-                    }
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required={newLead.consent === "Yes"}
+                  value={new Date().toLocaleDateString('en-GB')}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+                  disabled
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Format: dd/mm/yyyy (e.g., 15/04/2025)
+                  Automatically set to today's date
                 </p>
               </div>
               <div>
@@ -695,16 +621,6 @@ export default function LeadsSupabase() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-                <input
-                  type="email"
-                  value={selectedLead.email}
-                  onChange={(e) => setSelectedLead({...selectedLead, email: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
                 <input
                   type="tel"
@@ -725,20 +641,10 @@ export default function LeadsSupabase() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company</label>
-                <input
-                  type="text"
-                  value={selectedLead.company}
-                  onChange={(e) => setSelectedLead({...selectedLead, company: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Customer Consent</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Interested</label>
                 <select
-                  value={selectedLead.consent}
-                  onChange={(e) => setSelectedLead({...selectedLead, consent: e.target.value})}
+                  value={selectedLead.interested}
+                  onChange={(e) => setSelectedLead({...selectedLead, interested: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
@@ -747,46 +653,15 @@ export default function LeadsSupabase() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Consent Date</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contacted Date</label>
                 <input
                   type="text"
-                  placeholder="dd/mm/yyyy"
-                  value={(() => {
-                    try {
-                      if (selectedLead.consent_date) {
-                        if (selectedLead.consent_date.includes('-')) {
-                          const parts = selectedLead.consent_date.split('-');
-                          if (parts.length === 3) {
-                            if (parts[0].length === 4) {
-                              return new Date(selectedLead.consent_date).toLocaleDateString('en-GB');
-                            } else {
-                              const [day, month, year] = parts;
-                              return `${day}/${month}/${year}`;
-                            }
-                          }
-                        }
-                        return selectedLead.consent_date;
-                      }
-                      return '';
-                    } catch (error) {
-                      return selectedLead.consent_date || '';
-                    }
-                  })()}
-                  onChange={(e) => {
-                    const input = e.target.value;
-                    if (input.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
-                      const [day, month, year] = input.split('/');
-                      const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-                      setSelectedLead({...selectedLead, consent_date: isoDate});
-                    } else {
-                      setSelectedLead({...selectedLead, consent_date: input});
-                    }
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required={selectedLead.consent === "Yes"}
+                  value={selectedLead.contacted_date ? new Date(selectedLead.contacted_date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB')}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+                  disabled
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Format: dd/mm/yyyy (e.g., 15/04/2025)
+                  Automatically set to today's date
                 </p>
               </div>
               <div>
@@ -835,39 +710,24 @@ export default function LeadsSupabase() {
                 <p className="text-sm text-gray-900 dark:text-white">{selectedLead.name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-                <p className="text-sm text-gray-900 dark:text-white">{selectedLead.email}</p>
-              </div>
-              <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
                 <p className="text-sm text-gray-900 dark:text-white">{maskPhoneNumber(selectedLead.phone)}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">State</label>
-                <p className="text-sm text-gray-900 dark:text-white">{selectedLead.state}</p>
+                <p className="text-sm text-gray-900 dark:text-white">{selectedLead.state || 'Not set'}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company</label>
-                <p className="text-sm text-gray-900 dark:text-white">{selectedLead.company}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Customer Consent</label>
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getConsentColor(selectedLead.consent)}`}>
-                  {selectedLead.consent}
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Interested</label>
+                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getInterestedColor(selectedLead.interested)}`}>
+                  {selectedLead.interested}
                 </span>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Consent Date</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contacted Date</label>
                 <p className="text-sm text-gray-900 dark:text-white">
-                  {selectedLead.consent_date ? (
-                    <div>
-                      <div>{new Date(selectedLead.consent_date).toLocaleDateString('en-GB')}</div>
-                      {selectedLead.consent === "Yes" && (
-                        <div className={`text-xs ${isConsentValid(selectedLead.consent_date) ? 'text-green-600' : 'text-orange-600'}`}>
-                          {isConsentValid(selectedLead.consent_date) ? 'Valid' : 'Expired'}
-                        </div>
-                      )}
-                    </div>
+                  {selectedLead.contacted_date ? (
+                    new Date(selectedLead.contacted_date).toLocaleDateString('en-GB')
                   ) : (
                     <span className="text-gray-400">Not set</span>
                   )}
