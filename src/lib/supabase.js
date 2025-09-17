@@ -4,12 +4,18 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://eyckmkzfisrugt
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5Y2tta3pmaXNydWd0ZGdvd2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5MjIyMjYsImV4cCI6MjA3MzQ5ODIyNn0.n_j-wJV_m-Trc25jz8do0BNNHKJusj3cGGOKZNzjyCQ'
 
 // Validate environment variables
+console.log('🔧 Supabase Configuration:')
+console.log('📡 VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL || 'using fallback')
+console.log('🔑 VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'set' : 'using fallback')
+console.log('🌐 Final URL:', supabaseUrl)
+console.log('🔑 Final Key:', supabaseAnonKey ? 'set' : 'missing')
+
 if (!import.meta.env.VITE_SUPABASE_URL) {
-  console.warn('VITE_SUPABASE_URL is not set - using fallback')
+  console.warn('⚠️ VITE_SUPABASE_URL is not set - using fallback')
 }
 
 if (!import.meta.env.VITE_SUPABASE_ANON_KEY) {
-  console.warn('VITE_SUPABASE_ANON_KEY is not set - using fallback')
+  console.warn('⚠️ VITE_SUPABASE_ANON_KEY is not set - using fallback')
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {

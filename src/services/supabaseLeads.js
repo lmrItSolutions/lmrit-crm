@@ -4,6 +4,9 @@ class SupabaseLeadsService {
   // Get all leads with filters
   async getLeads(filters = {}) {
     try {
+      console.log('🔄 SupabaseLeadsService.getLeads called')
+      console.log('📊 Filters:', filters)
+      
       let query = db.leads()
         .select(`
           *,
@@ -42,11 +45,20 @@ class SupabaseLeadsService {
         query = query.eq('consent', filters.consent)
       }
 
+      console.log('📡 Executing Supabase query...')
       const { data, error } = await query
-
-      if (error) throw error
+      
+      console.log('📊 Supabase response:', { data, error })
+      
+      if (error) {
+        console.error('❌ Supabase error:', error)
+        throw error
+      }
+      
+      console.log('✅ Successfully fetched leads:', data?.length || 0)
       return { success: true, data, error: null }
     } catch (error) {
+      console.error('💥 Error in getLeads:', error)
       return { success: false, data: null, error: error.message }
     }
   }
